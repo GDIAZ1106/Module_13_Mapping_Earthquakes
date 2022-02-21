@@ -16,6 +16,18 @@ function styleInfo(feature) {
   };
 }
 
+
+function styleInfo2(feature) {
+  return {
+    opacity: 1,
+    fillOpacity: 0.7,
+    fillColor: getColor(feature.properties.mag),
+    color: "#000000",
+    radius: getRadius(feature.properties.mag),
+    stroke: true,
+    weight: 0.5
+  };
+}
 // This function determines the radius of the earthquake marker based on its magnitude.
 // Earthquakes with a magnitude of 0 will be plotted with a radius of 1.
 
@@ -47,10 +59,34 @@ function getColor(magnitude) {
 }
 // Create the earthquake and tectonic plates layers for our map.
 let earthquakes = new L.layerGroup();
-let tectonicPlates = new L.layerGroup(); 
+let tectonicPlates = new L.layerGroup();
+let majorQuakes = new L.layerGroup(); 
 
 // Retrieve the earthquake GeoJSON data.
 d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson").then(function(data) {
+  // Creating a GeoJSON layer with the retrieved data.
+  L.geoJSON(data, {
+    // We turn each feature into a circleMarker on the map.
+    pointToLayer: function(feature, latlng) {
+        console.log(data);
+        return L.circleMarker(latlng);
+      },
+    // We set the style for each circleMarker using our styleInfo function.
+  style: styleInfo2,
+    // We create a popup for each circleMarker to display the magnitude and
+    //  location of the earthquake after the marker has been created and styled.
+    onEachFeature: function(feature, layer) {
+    layer.bindPopup("Magnitude: " + feature.properties.mag + "<br>Location: " + feature.properties.place);
+  }
+  }).addTo(earthquakes);
+
+
+
+
+});
+
+  // Retrieve the Major Earthquakes GeoJSON data.
+d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson").then(function(data) {
   // Creating a GeoJSON layer with the retrieved data.
   L.geoJSON(data, {
     // We turn each feature into a circleMarker on the map.
@@ -65,13 +101,11 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
     onEachFeature: function(feature, layer) {
     layer.bindPopup("Magnitude: " + feature.properties.mag + "<br>Location: " + feature.properties.place);
   }
-  }).addTo(earthquakes);
-
-  //Then we add the earthquake layer to our map
-  earthquakes.addTo(map);
-  tectonicPlates.addTo(map);
+  }).addTo(majorQuakes);
 
 });
+
+
 
 // We create the tile layer that will be the background of our map.
 let streets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token={accessToken}', {
@@ -87,11 +121,33 @@ let satelliteStreets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/sate
   accessToken: API_KEY
 });
 
+// Delieverable 3 - Dark Map
+let dark_Streets = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery (c) <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/dark-v10',
+    accessToken: API_KEY
+});
+
+
+// Create the map object with center, zoom level and default layer.
+let map = L.map('mapid', {
+  center: [39.5, -98.5],
+  zoom: 3,
+  layers: [streets]
+})
+
+
+//Then we add the earthquake layer to our map
+earthquakes.addTo(map);
+tectonicPlates.addTo(map);
+majorQuakes.addTo(map);
 
 // Create a base layer that holds both maps.
 let baseMaps = {
-  Streets: streets,
-  Satellite: satelliteStreets
+  "Streets": streets,
+  "Satellite": satelliteStreets,
+  "Night Streets": dark_Streets,
 };
 
 
@@ -100,14 +156,10 @@ let baseMaps = {
 let overlays = {
   "Earthquakes": earthquakes,
   "Tectonic Plate": tectonicPlates,
+  "Major Earthquakes": majorQuakes,
 };
 
-  // Create the map object with center, zoom level and default layer.
-  let map = L.map('mapid', {
-    center: [39.5, -98.5],
-    zoom: 3,
-    layers: [streets]
-  })
+
 
 // Then we add a control to the map that will allow the user to change which
 // layers are visible
@@ -156,5 +208,13 @@ d3.json(tectonicPlateData).then(function(data) {
   console.log(data);
 
 // Creating a GeoJSON layer with the retrieved data.
-  L.geoJSON(data).addTo(tectonicPlates);
+  L.geoJSON(data, {
+    color: "red"
+  }).addTo(tectonicPlates);
 });
+
+L.geoJSON(data, {
+  color: "red"
+}).addTo(majorQuakes);
+
+

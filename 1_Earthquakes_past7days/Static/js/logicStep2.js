@@ -85,11 +85,20 @@ let satelliteStreets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/sate
   accessToken: API_KEY
 });
 
+// Delieverable 3 - Dark Map
+let dark_Streets = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery (c) <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/dark-v10',
+    accessToken: API_KEY
+});
+
 
 // Create a base layer that holds both maps.
 let baseMaps = {
   Streets: streets,
-  Satellite: satelliteStreets
+  Satellite: satelliteStreets,
+  Night Streets: dark_Streets,
 };
 
 
