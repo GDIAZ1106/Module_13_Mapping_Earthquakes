@@ -1,6 +1,17 @@
 // Console working test
 console.log("working")
 
+// Create the earthquake layer for our map.
+let earthquakes = new L.layerGroup(); 
+
+// We define an object that contains the overlays.
+// This overlay will be visible all the time.
+let overlays = {
+  Earthquakes: earthquakes
+};
+
+
+
 // This function returns the style data for each of the earthquakes we plot on
 // the map. We pass the magnitude of the earthquake into a function
 // to calculate the radius.
@@ -64,8 +75,6 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
   }
   }).addTo(earthquakes);
 
-  //Then we add the earthquake layer to our map
-  earthquakes.addTo(map);
 
 });
 
@@ -87,17 +96,16 @@ let satelliteStreets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/sate
 // Create a base layer that holds both maps.
 let baseMaps = {
   Streets: streets,
-  Satellite: satelliteStreets
-};
+  Satellite: satelliteStreets,
 
-// Create the earthquake layer for our map.
-let earthquakes = new L.layerGroup(); 
 
-// We define an object that contains the overlays.
-// This overlay will be visible all the time.
-let overlays = {
-  Earthquakes: earthquakes
-};
+
+
+  //Then we add the earthquake layer to our map
+  earthquakes.addTo(map);
+
+
+
 
   // Create the map object with center, zoom level and default layer.
   let map = L.map('mapid', {
@@ -105,12 +113,6 @@ let overlays = {
     zoom: 3,
     layers: [satelliteStreets]
   })
-
-// Then we add a control to the map that will allow the user to change which
-// layers are visible
-
-L.control.layers(baseMaps, overlays).addTo(map);
-
 
 // Create a legend control object.
 let legend = L.control({
@@ -145,26 +147,13 @@ legend.onAdd = function() {
 legend.addTo(map);
 
 // Accessing the Toronto airline routes GeoJSON URL.
-let torontoData = "https://raw.githubusercontent.com/GDIAZ1106/Module_13_Mapping_Earthquakes/Mapping_GeoJSON_Linestrings/Mapping_GeoJSON_Linestrings/torontoRoutes.json";
+let tectonicPlateData = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
 
 
 // Grabbing our GeoJSON data.
-d3.json(torontoData).then(function(data) {
+d3.json(tectonicPlateData).then(function(data) {
   console.log(data);
 
-// Create a style for the lines.
-let myStyle = {
-  color: "#ffffa1",
-  weight: 2
-}
 // Creating a GeoJSON layer with the retrieved data.
-L.geoJSON(data, {
-    style: myStyle,
-    oneEachFeature: function(feature, layer) {
-      console.log(feature);
-      return L.marker(layer)
-    .bindPopup(`<h3>Airline: ${feature.properties.airline}</h3><hr><h3> Destination:${feature.properties.dst}</h3>`);
-
-  }
-}).addTo(map);
+  L.geoJSON(data).addTo(map);
 });
