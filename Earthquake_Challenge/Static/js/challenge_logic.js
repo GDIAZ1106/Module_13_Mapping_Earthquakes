@@ -1,17 +1,6 @@
 // Console working test
 console.log("working")
 
-// Create the earthquake layer for our map.
-let earthquakes = new L.layerGroup(); 
-
-// We define an object that contains the overlays.
-// This overlay will be visible all the time.
-let overlays = {
-  Earthquakes: earthquakes
-};
-
-
-
 // This function returns the style data for each of the earthquakes we plot on
 // the map. We pass the magnitude of the earthquake into a function
 // to calculate the radius.
@@ -56,6 +45,9 @@ function getColor(magnitude) {
   }
   return "#98ee00";
 }
+// Create the earthquake and tectonic plates layers for our map.
+let earthquakes = new L.layerGroup();
+let tectonicPlates = new L.layerGroup(); 
 
 // Retrieve the earthquake GeoJSON data.
 d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson").then(function(data) {
@@ -75,6 +67,9 @@ d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geoj
   }
   }).addTo(earthquakes);
 
+  //Then we add the earthquake layer to our map
+  earthquakes.addTo(map);
+  tectonicPlates.addTo(map);
 
 });
 
@@ -96,23 +91,29 @@ let satelliteStreets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/sate
 // Create a base layer that holds both maps.
 let baseMaps = {
   Streets: streets,
-  Satellite: satelliteStreets,
+  Satellite: satelliteStreets
+};
 
 
-
-
-  //Then we add the earthquake layer to our map
-  earthquakes.addTo(map);
-
-
-
+// We define an object that contains the overlays.
+// This overlay will be visible all the time.
+let overlays = {
+  "Earthquakes": earthquakes,
+  "Tectonic Plate": tectonicPlates,
+};
 
   // Create the map object with center, zoom level and default layer.
   let map = L.map('mapid', {
     center: [39.5, -98.5],
     zoom: 3,
-    layers: [satelliteStreets]
+    layers: [streets]
   })
+
+// Then we add a control to the map that will allow the user to change which
+// layers are visible
+
+L.control.layers(baseMaps, overlays).addTo(map);
+
 
 // Create a legend control object.
 let legend = L.control({
@@ -146,7 +147,7 @@ legend.onAdd = function() {
 //add legend to the map object
 legend.addTo(map);
 
-// Accessing the Toronto airline routes GeoJSON URL.
+// Accessing the Tectonic Plates Data by GeoJSON URL.
 let tectonicPlateData = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
 
 
@@ -155,5 +156,5 @@ d3.json(tectonicPlateData).then(function(data) {
   console.log(data);
 
 // Creating a GeoJSON layer with the retrieved data.
-  L.geoJSON(data).addTo(map);
+  L.geoJSON(data).addTo(tectonicPlates);
 });
