@@ -30,24 +30,31 @@ let map = L.map('mapid', {
 // Pass our map layers into our layers control and add the layers control to the map.
 L.control.layers(baseMaps).addTo(map);
 
-// Accessing the airport GeoJSON URL
-let airportData = "https://raw.githubusercontent.com/GDIAZ1106/Module_13_Mapping_Earthquakes/Mapping_GeoJSON_Points/Mapping_GeoJSON_Points/majorAirports.json";
+// Accessing the Toronto airline routes GeoJSON URL.
+let torontoData = "https://raw.githubusercontent.com/GDIAZ1106/Module_13_Mapping_Earthquakes/Mapping_GeoJSON_Linestrings/Mapping_GeoJSON_Linestrings/torontoRoutes.json";
 
 
 // Grabbing our GeoJSON data.
-d3.json(airportData).then(function(data) {
+d3.json(torontoData).then(function(data) {
   console.log(data);
+
+// Create a style for the lines.
+let myStyle = {
+  color: "#ffffa1",
+  weight: 2
+}
 // Creating a GeoJSON layer with the retrieved data.
 L.geoJSON(data, {
-  // We turn each feature into a marker on the map.
-    pointToLayer: function(feature, latlng) {
+    style: myStyle,
+    oneEachFeature: function(feature, layer) {
       console.log(feature);
-      return L.marker(latlng)
-      .bindPopup( "<h2>Airport Code: " + feature.properties.faa +"</h2><hr><h3> Airport Name: " + feature.properties.name + "</h3>");
-    }
-    })
-    .addTo(map);
+      return L.marker(layer)
+    .bindPopup(`<h3>Airline: ${feature.properties.airline}</h3><hr><h3> Destination:${feature.properties.dst}</h3>`);
+
+  }
+}).addTo(map);
 });
+
 
 
 
