@@ -152,4 +152,3 @@ legend.onAdd = function() {
 
 //add legend to the map object
 legend.addTo(map);
-
